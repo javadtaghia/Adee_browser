@@ -203,12 +203,18 @@ class BrowserModel extends ChangeNotifier {
 
   void addTabs(List<WebViewTab> webViewTabs) {
     for (var webViewTab in webViewTabs) {
+      webViewTab.webViewModel.needsToCompleteInitialLoad = true;
       _webViewTabs.add(webViewTab);
       webViewTab.webViewModel.tabIndex = _webViewTabs.length - 1;
     }
     _currentTabIndex = _webViewTabs.length - 1;
     if (_currentTabIndex >= 0) {
       _currentWebViewModel.updateWithValue(webViewTabs.last.webViewModel);
+    }
+
+    if (kDebugMode) {
+      print(
+          "######## LOADED STATUS OF THE FIRST ${_webViewTabs.first.webViewModel.needsToCompleteInitialLoad} #####");
     }
 
     notifyListeners();
@@ -233,10 +239,22 @@ class BrowserModel extends ChangeNotifier {
   }
 
   void showTab(int index) {
+    if (kDebugMode) {
+      print("**** NEEDS LOADING  1 *****");
+      print(
+          "**** NEEDS LOADING  ${_webViewTabs[index].webViewModel.needsToCompleteInitialLoad} *****");
+    }
     if (_currentTabIndex != index) {
       _currentTabIndex = index;
       _currentWebViewModel
           .updateWithValue(_webViewTabs[_currentTabIndex].webViewModel);
+
+      if (_webViewTabs[_currentTabIndex]
+          .webViewModel
+          .needsToCompleteInitialLoad) {
+        _currentWebViewModel.webViewController?.reload();
+        _currentWebViewModel.needsToCompleteInitialLoad = false;
+      }
 
       notifyListeners();
     }
@@ -259,6 +277,9 @@ class BrowserModel extends ChangeNotifier {
   }
 
   bool containsFavorite(FavoriteModel favorite) {
+    if (kDebugMode) {
+      print("fav contains");
+    }
     return _favorites.contains(favorite) ||
         _favorites
                 .map((e) => e)
@@ -268,20 +289,32 @@ class BrowserModel extends ChangeNotifier {
 
   void addFavorite(FavoriteModel favorite) {
     _favorites.add(favorite);
+    if (kDebugMode) {
+      print("fav add");
+    }
     notifyListeners();
   }
 
   void addFavorites(List<FavoriteModel> favorites) {
     _favorites.addAll(favorites);
+    if (kDebugMode) {
+      print("fav add all${_favorites.length}");
+    }
     notifyListeners();
   }
 
   void clearFavorites() {
+    if (kDebugMode) {
+      print("fav cleardc");
+    }
     _favorites.clear();
     notifyListeners();
   }
 
   void removeFavorite(FavoriteModel favorite) {
+    if (kDebugMode) {
+      print("fav removed");
+    }
     if (!_favorites.remove(favorite)) {
       var favToRemove = _favorites
           .map((e) => e)
@@ -373,6 +406,7 @@ class BrowserModel extends ChangeNotifier {
 
   Future<void> flush() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     await prefs.setString("browser", json.encode(toJson()));
   }
 
@@ -381,17 +415,41 @@ class BrowserModel extends ChangeNotifier {
     Map<String, dynamic> browserData;
     try {
       String? source = prefs.getString("browser");
+
       if (source != null) {
         browserData = await json.decode(source);
-
+        if (kDebugMode) {
+          if (browserData.containsKey("favorites")) {
+            print(
+                "********* RESTORE ********** Favorites: ${browserData["favorites"]}");
+            print("Size of browserData: ${browserData.length}");
+          } else {
+            print("Favorites not found in browserData");
+          }
+        }
         clearFavorites();
         closeAllTabs();
         clearWebArchives();
 
-        List<Map<String, dynamic>> favoritesList =
-            browserData["favorites"]?.cast<Map<String, dynamic>>() ?? [];
-        List<FavoriteModel> favorites =
-            favoritesList.map((e) => FavoriteModel.fromMap(e)!).toList();
+        if (browserData.containsKey("favorites") &&
+            browserData["favorites"] is List) {
+          List favoritesData = browserData["favorites"];
+          List<FavoriteModel> favoritesList = [];
+
+          for (var favoriteMap in favoritesData) {
+            FavoriteModel? favorite =
+                FavoriteModel.fromMap(favoriteMap as Map<String, dynamic>?);
+            if (favorite != null) {
+              favoritesList.add(favorite);
+            }
+          }
+
+          addFavorites(favoritesList);
+        } else {
+          if (kDebugMode) {
+            print("No favorites data found in browserData");
+          }
+        }
 
         Map<String, dynamic> webArchivesMap =
             browserData["webArchives"]?.cast<String, dynamic>() ?? {};
@@ -418,7 +476,6 @@ class BrowserModel extends ChangeNotifier {
         webViewTabs.sort((a, b) =>
             a.webViewModel.tabIndex!.compareTo(b.webViewModel.tabIndex!));
 
-        addFavorites(favorites);
         addWebArchives(webArchives);
         updateSettings(settings);
         updateWebViewSettings(webviewsettings);
