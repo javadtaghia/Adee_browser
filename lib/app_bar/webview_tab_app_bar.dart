@@ -1113,37 +1113,58 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     );
   }
 
-  FlutterTts flutterTts = FlutterTts();
-
-  bool _isSpeaking = false;
-
-  void _speak(String text) async {
-    await flutterTts.stop();
-
-    // Define a reasonable chunk size
-    const int chunkSize = 4000; // Adjusted to a more realistic size
+  void _speak(String text, FlutterTts flutterTts) async {
+    bool isSpeaking = false;
 
     // Set up a completion handler
     flutterTts.setCompletionHandler(() {
-      _isSpeaking = false;
+      isSpeaking = false;
     });
 
-    for (int i = 0; i < text.length; i += chunkSize) {
+    int start = 0;
+    while (start < text.length) {
       // Wait if still speaking the previous chunk
-      while (_isSpeaking) {
-        await Future.delayed(Duration(milliseconds: 500));
+      while (isSpeaking) {
+        await Future.delayed(const Duration(milliseconds: 1));
       }
 
-      int end = (i + chunkSize < text.length) ? i + chunkSize : text.length;
-      String chunk = text.substring(i, end);
+      int end = findNextChunkEnd(text, start, 20);
+      String chunk = text.substring(start, end);
+      start = end + 1; // Update start for next chunk
 
       // Start speaking the next chunk
-      _isSpeaking = true;
+      isSpeaking = true;
       await flutterTts.speak(chunk);
     }
   }
 
-  void _stopSpeak() async {
+  int findNextChunkEnd(String text, int start, int maxWords) {
+    int end = start;
+    int words = 0;
+
+    while (end < text.length && words < maxWords) {
+      if (text[end] == ' ') {
+        words++;
+      }
+
+      if (".;?!,:\n".contains(text[end]) || words >= maxWords) {
+        break;
+      }
+
+      end++;
+    }
+
+    // Handle case where end of text is reached without punctuation or word limit
+    if (end >= text.length) {
+      return text.length;
+    }
+
+    // Find the next space after punctuation or word limit
+    int spaceIndex = text.indexOf(' ', end);
+    return (spaceIndex != -1) ? spaceIndex : end;
+  }
+
+  void _stopSpeak(var flutterTts) async {
     await flutterTts.stop();
   }
 
@@ -1154,6 +1175,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     var fontSize = webViewModel?.settings?.minimumFontSize ?? 16;
     var fontFamily = webViewModel?.settings?.standardFontFamily ??
         'sans-serif'; // Corrected line
+    if (fontSize <= 8) {
+      fontSize = 16;
+    }
+
+    FlutterTts? flutterTts = FlutterTts();
 
     if (url != null) {
       try {
@@ -1165,20 +1191,25 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           List<dom.Element> elements = document.querySelectorAll(
               'title, h1, h2, h3, h4, h5, h6, h7, p, texarea');
 
-          var text = elements.map((e) => e.text).join(" ");
+          var text = elements.map((e) => e.text).join("\n");
           if (kDebugMode) {
-            print("### TEXT ### " + text);
+            print("### TEXT ### $text");
           }
 
           // Convert the elements to a list of widgets
           List<Widget> elementWidgets = elements.map((element) {
-            return Text(
-              element.text,
-              style: TextStyle(
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 2.0), // 2px padding on left and right
+              child: Text(
+                element.text,
+                style: TextStyle(
                   fontWeight: FontWeight.normal,
                   fontSize: fontSize * 1.05,
                   letterSpacing: 1.05,
-                  fontFamily: fontFamily),
+                  fontFamily: fontFamily,
+                ),
+              ),
             );
           }).toList();
 
@@ -1201,8 +1232,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                               IconButton(
                                 icon: const Icon(Icons.volume_up),
                                 onPressed: () async {
-                                  _speak(
-                                      text); // Ensure this method is correctly implemented
+                                  _speak(text,
+                                      flutterTts!); // Ensure this method is correctly implemented
                                 },
                               ),
                             ],
@@ -1231,9 +1262,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 child: child,
               );
             },
-          ).then((value) {
+          ).then((value) async {
             // This code runs after the dialog is dismissed
-            _stopSpeak(); // Stop speaking when the dialog is closed
+            _stopSpeak(flutterTts);
+            flutterTts = null; // Stop speaking when the dialog is closed
           });
         } else {
           // Handle HTTP request error
