@@ -26,7 +26,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
 import 'dart:convert';
-
+import 'package:flutter_tts/flutter_tts.dart';
 import '../animated_flutter_browser_logo.dart';
 import '../custom_popup_dialog.dart';
 import '../custom_popup_menu_item.dart';
@@ -1113,12 +1113,47 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     );
   }
 
+  FlutterTts flutterTts = FlutterTts();
+
+  bool _isSpeaking = false;
+
+  void _speak(String text) async {
+    await flutterTts.stop();
+
+    // Define a reasonable chunk size
+    const int chunkSize = 4000; // Adjusted to a more realistic size
+
+    // Set up a completion handler
+    flutterTts.setCompletionHandler(() {
+      _isSpeaking = false;
+    });
+
+    for (int i = 0; i < text.length; i += chunkSize) {
+      // Wait if still speaking the previous chunk
+      while (_isSpeaking) {
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+
+      int end = (i + chunkSize < text.length) ? i + chunkSize : text.length;
+      String chunk = text.substring(i, end);
+
+      // Start speaking the next chunk
+      _isSpeaking = true;
+      await flutterTts.speak(chunk);
+    }
+  }
+
+  void _stopSpeak() async {
+    await flutterTts.stop();
+  }
+
   void showTrimReader() async {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var webViewModel = browserModel.getCurrentTab()?.webViewModel;
     var url = webViewModel?.url;
     var fontSize = webViewModel?.settings?.minimumFontSize ?? 16;
-    var fontFamily = webViewModel?.settings?.standardFontFamily = 'sans-serif';
+    var fontFamily = webViewModel?.settings?.standardFontFamily ??
+        'sans-serif'; // Corrected line
 
     if (url != null) {
       try {
@@ -1127,33 +1162,51 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         if (response.statusCode == 200) {
           // Parse the HTML content and extract elements
           var document = parser.parse(response.body);
-          List<dom.Element> elements =
-              document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, img');
+          List<dom.Element> elements = document.querySelectorAll(
+              'title, h1, h2, h3, h4, h5, h6, h7, p, texarea');
+
+          var text = elements.map((e) => e.text).join(" ");
+          if (kDebugMode) {
+            print("### TEXT ### " + text);
+          }
 
           // Convert the elements to a list of widgets
           List<Widget> elementWidgets = elements.map((element) {
-            return Text(element.text,
-                style: TextStyle(
-                    fontWeight: FontWeight.normal,
-                    fontSize: fontSize * 1.05,
-                    letterSpacing: 1.05,
-                    fontFamily: fontFamily));
+            return Text(
+              element.text,
+              style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontSize: fontSize * 1.05,
+                  letterSpacing: 1.05,
+                  fontFamily: fontFamily),
+            );
           }).toList();
 
           // Show a custom dialog simulating a drawer from the right
+          // ignore: use_build_context_synchronously
           showGeneralDialog(
             context: context,
             pageBuilder: (context, animation, secondaryAnimation) {
               return SafeArea(
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width *
-                        1, // 80% of screen width
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
                     child: Material(
                       child: Column(
                         children: [
-                          AppBar(title: const Text('Reading mode')),
+                          AppBar(
+                            title: const Text('Reading mode'),
+                            actions: [
+                              IconButton(
+                                icon: const Icon(Icons.volume_up),
+                                onPressed: () async {
+                                  _speak(
+                                      text); // Ensure this method is correctly implemented
+                                },
+                              ),
+                            ],
+                          ),
                           Expanded(
                             child: SingleChildScrollView(
                               child: Column(children: elementWidgets),
@@ -1168,22 +1221,25 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             },
             barrierDismissible: true,
             barrierLabel: "Dismiss",
-            transitionDuration: Duration(milliseconds: 300),
+            transitionDuration: const Duration(milliseconds: 300),
             transitionBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
-                  begin: const Offset(1, 0), // Start from the right
+                  begin: const Offset(1, 0),
                   end: Offset.zero,
                 ).animate(animation),
                 child: child,
               );
             },
-          );
+          ).then((value) {
+            // This code runs after the dialog is dismissed
+            _stopSpeak(); // Stop speaking when the dialog is closed
+          });
         } else {
           // Handle HTTP request error
         }
       } catch (e) {
-        // Handle general errors
+        // Handle errors
       }
     } else {
       // Handle case where URL is null

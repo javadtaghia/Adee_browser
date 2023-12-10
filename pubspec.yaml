@@ -16,8 +16,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix. 09/12/2023
-version: 2.0.0+31
+# of the product and file versions while build-number is used as the build suffix. 10/12/2023
+version: 2.0.0+32
 
 environment:
   sdk: ">=2.18.0 <3.0.0"
@@ -38,6 +38,7 @@ dependencies:
   webview_flutter: ^3.0.0
   http: ^0.13.3 
   html: ^0.15.0
+  flutter_tts: ^3.2.2
   flutter_adeeinappwebview: ^6.0.0-beta.32
   flutter_downloader: ^1.8.4
   path_provider: ^2.0.11
