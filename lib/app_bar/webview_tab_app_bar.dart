@@ -21,7 +21,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:share_plus/share_plus.dart';
-
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parser;
+import 'package:html/dom.dart' as dom;
+import 'dart:convert';
+import 'package:flutter_tts/flutter_tts.dart';
 import '../animated_flutter_browser_logo.dart';
 import '../custom_popup_dialog.dart';
 import '../custom_popup_menu_item.dart';
@@ -596,6 +601,20 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         )
                       ]),
                 );
+              case PopupMenuActions.TRIM_READER:
+                return CustomPopupMenuItem<String>(
+                  enabled: true,
+                  value: choice,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(choice),
+                        const Icon(
+                          Icons.book_online_rounded,
+                          color: Colors.deepPurpleAccent,
+                        )
+                      ]),
+                );
               case PopupMenuActions.FAVORITES:
                 return CustomPopupMenuItem<String>(
                   enabled: true,
@@ -790,6 +809,9 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         break;
       case PopupMenuActions.HISTORY:
         showHistory();
+        break;
+      case PopupMenuActions.TRIM_READER:
+        showTrimReader();
         break;
       case PopupMenuActions.WEB_ARCHIVES:
         showWebArchives();
@@ -1089,6 +1111,226 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
       isScrollControlled:
           false, // Set to true if you want the sheet to take the full screen height
     );
+  }
+
+  void _speak(String text, FlutterTts flutterTts) async {
+    bool isSpeaking = false;
+
+    // Set up a completion handler
+    flutterTts.setCompletionHandler(() {
+      isSpeaking = false;
+    });
+
+    int start = 0;
+    while (start < text.length) {
+      // Wait if still speaking the previous chunk
+      while (isSpeaking) {
+        await Future.delayed(const Duration(milliseconds: 1));
+      }
+
+      int end = findNextChunkEnd(text, start, 20);
+      String chunk = text.substring(start, end);
+      start = end + 1; // Update start for next chunk
+
+      // Start speaking the next chunk
+      isSpeaking = true;
+      await flutterTts.speak(chunk);
+    }
+  }
+
+  int findNextChunkEnd(String text, int start, int maxWords) {
+    int end = start;
+    int words = 0;
+
+    while (end < text.length && words < maxWords) {
+      if (text[end] == ' ') {
+        words++;
+      }
+
+      if (".;?!,:\n".contains(text[end]) || words >= maxWords) {
+        break;
+      }
+
+      end++;
+    }
+
+    // Handle case where end of text is reached without punctuation or word limit
+    if (end >= text.length) {
+      return text.length;
+    }
+
+    // Find the next space after punctuation or word limit
+    int spaceIndex = text.indexOf(' ', end);
+    return (spaceIndex != -1) ? spaceIndex : end;
+  }
+
+  void _stopSpeak(var flutterTts) async {
+    await flutterTts.stop();
+  }
+
+  void showTrimReader() async {
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+    var url = webViewModel?.url;
+    var fontSize = webViewModel?.settings?.minimumFontSize ?? 16;
+    var fontFamily = webViewModel?.settings?.standardFontFamily ??
+        'sans-serif'; // Corrected line
+    if (fontSize <= 8) {
+      fontSize = 16;
+    }
+
+    FlutterTts? flutterTts = FlutterTts();
+
+    if (url != null) {
+      try {
+        // Fetch the webpage content
+        final response = await http.get(Uri.parse(url.toString()));
+        if (response.statusCode == 200) {
+          // Parse the HTML content and extract elements
+          var document = parser.parse(response.body);
+          List<dom.Element> elements = document.querySelectorAll(
+              'title, h1, h2, h3, h4, h5, h6, h7, p, texarea');
+
+          var text = elements.map((e) => e.text).join("\n");
+          if (kDebugMode) {
+            print("### TEXT ### $text");
+          }
+
+          // Convert the elements to a list of widgets
+          List<Widget> elementWidgets = elements.map((element) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 2.0), // 2px padding on left and right
+              child: Text(
+                element.text,
+                style: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  fontSize: fontSize * 1.05,
+                  letterSpacing: 1.05,
+                  fontFamily: fontFamily,
+                ),
+              ),
+            );
+          }).toList();
+
+          // Show a custom dialog simulating a drawer from the right
+          // ignore: use_build_context_synchronously
+          showGeneralDialog(
+            context: context,
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return SafeArea(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Material(
+                      child: Column(
+                        children: [
+                          AppBar(
+                            title: const Text('Reading mode'),
+                            actions: [
+                              IconButton(
+                                icon: const Icon(Icons.volume_up),
+                                onPressed: () async {
+                                  _speak(text,
+                                      flutterTts!); // Ensure this method is correctly implemented
+                                },
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(children: elementWidgets),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+            barrierDismissible: true,
+            barrierLabel: "Dismiss",
+            transitionDuration: const Duration(milliseconds: 300),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          ).then((value) async {
+            // This code runs after the dialog is dismissed
+            _stopSpeak(flutterTts);
+            flutterTts = null; // Stop speaking when the dialog is closed
+          });
+        } else {
+          // Handle HTTP request error
+        }
+      } catch (e) {
+        // Handle errors
+      }
+    } else {
+      // Handle case where URL is null
+    }
+  }
+
+  void showTrimReader_bottom() async {
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+    var url = webViewModel?.url;
+    var fontSize = webViewModel?.settings?.minimumFontSize ?? 16;
+
+    if (url != null) {
+      try {
+        // Fetch the webpage content
+        final response = await http.get(Uri.parse(url.toString()));
+        if (response.statusCode == 200) {
+          // Parse the HTML content and extract headings
+          var document = parser.parse(response.body);
+          List<dom.Element> headings =
+              document.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
+
+          // Convert the headings to a list of widgets
+          List<Widget> headingWidgets = headings.map((heading) {
+            return Text(heading.text,
+                style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: fontSize * 1.05,
+                    letterSpacing: 1.05));
+          }).toList();
+
+          // Show the modal bottom sheet with the extracted headings
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                child: Column(
+                  children: [
+                    AppBar(title: const Text('Reading mode')),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(children: headingWidgets),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            isScrollControlled: false,
+          );
+        } else {
+          // Handle HTTP request error
+        }
+      } catch (e) {
+        // Handle general errors
+      }
+    } else {
+      // Handle case where URL is null
+    }
   }
 
   void showHistory_old() {
