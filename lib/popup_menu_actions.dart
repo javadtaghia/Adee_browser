@@ -25,10 +25,13 @@ class PopupMenuActions {
   static const String COPY_CURRENT_URL = "Copy URL";
   // ignore: constant_identifier_names
   static const String EXIT_APP = "Exit";
+  // ignore: constant_identifier_names
+  static const String TRIM_READER = "Reading mode";
 
   static const List<String> choices = <String>[
     NEW_TAB,
     NEW_INCOGNITO_TAB,
+    TRIM_READER,
     FAVORITES,
     //HISTORY,
     SHARE,

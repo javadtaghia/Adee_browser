@@ -21,6 +21,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parser;
+import 'package:html/dom.dart' as dom;
+import 'dart:convert';
 
 import '../animated_flutter_browser_logo.dart';
 import '../custom_popup_dialog.dart';
@@ -596,6 +601,20 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         )
                       ]),
                 );
+              case PopupMenuActions.TRIM_READER:
+                return CustomPopupMenuItem<String>(
+                  enabled: true,
+                  value: choice,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(choice),
+                        const Icon(
+                          Icons.book_online_rounded,
+                          color: Colors.deepPurpleAccent,
+                        )
+                      ]),
+                );
               case PopupMenuActions.FAVORITES:
                 return CustomPopupMenuItem<String>(
                   enabled: true,
@@ -790,6 +809,9 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         break;
       case PopupMenuActions.HISTORY:
         showHistory();
+        break;
+      case PopupMenuActions.TRIM_READER:
+        showTrimReader();
         break;
       case PopupMenuActions.WEB_ARCHIVES:
         showWebArchives();
@@ -1089,6 +1111,138 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
       isScrollControlled:
           false, // Set to true if you want the sheet to take the full screen height
     );
+  }
+
+  void showTrimReader() async {
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+    var url = webViewModel?.url;
+    var fontSize = webViewModel?.settings?.minimumFontSize ?? 16;
+    var fontFamily = webViewModel?.settings?.standardFontFamily = 'sans-serif';
+
+    if (url != null) {
+      try {
+        // Fetch the webpage content
+        final response = await http.get(Uri.parse(url.toString()));
+        if (response.statusCode == 200) {
+          // Parse the HTML content and extract elements
+          var document = parser.parse(response.body);
+          List<dom.Element> elements =
+              document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, img');
+
+          // Convert the elements to a list of widgets
+          List<Widget> elementWidgets = elements.map((element) {
+            return Text(element.text,
+                style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: fontSize * 1.05,
+                    letterSpacing: 1.05,
+                    fontFamily: fontFamily));
+          }).toList();
+
+          // Show a custom dialog simulating a drawer from the right
+          showGeneralDialog(
+            context: context,
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return SafeArea(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width *
+                        1, // 80% of screen width
+                    child: Material(
+                      child: Column(
+                        children: [
+                          AppBar(title: const Text('Reading mode')),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(children: elementWidgets),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+            barrierDismissible: true,
+            barrierLabel: "Dismiss",
+            transitionDuration: Duration(milliseconds: 300),
+            transitionBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0), // Start from the right
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        } else {
+          // Handle HTTP request error
+        }
+      } catch (e) {
+        // Handle general errors
+      }
+    } else {
+      // Handle case where URL is null
+    }
+  }
+
+  void showTrimReader_bottom() async {
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+    var url = webViewModel?.url;
+    var fontSize = webViewModel?.settings?.minimumFontSize ?? 16;
+
+    if (url != null) {
+      try {
+        // Fetch the webpage content
+        final response = await http.get(Uri.parse(url.toString()));
+        if (response.statusCode == 200) {
+          // Parse the HTML content and extract headings
+          var document = parser.parse(response.body);
+          List<dom.Element> headings =
+              document.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
+
+          // Convert the headings to a list of widgets
+          List<Widget> headingWidgets = headings.map((heading) {
+            return Text(heading.text,
+                style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: fontSize * 1.05,
+                    letterSpacing: 1.05));
+          }).toList();
+
+          // Show the modal bottom sheet with the extracted headings
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                child: Column(
+                  children: [
+                    AppBar(title: const Text('Reading mode')),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(children: headingWidgets),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            isScrollControlled: false,
+          );
+        } else {
+          // Handle HTTP request error
+        }
+      } catch (e) {
+        // Handle general errors
+      }
+    } else {
+      // Handle case where URL is null
+    }
   }
 
   void showHistory_old() {
