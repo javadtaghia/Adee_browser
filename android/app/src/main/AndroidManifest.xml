@@ -52,8 +52,11 @@
                   have been supplied, we are a good candidate. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.WEB_SEARCH" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+                        <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:scheme="inline" />
@@ -63,19 +66,8 @@
                 <data android:mimeType="application/vnd.wap.xhtml+xml"/>
             </intent-filter>
             <!-- We are also the main entry point of the browser. -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.BROWSABLE" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.WEB_SEARCH" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-            </intent-filter>
+    
+            
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

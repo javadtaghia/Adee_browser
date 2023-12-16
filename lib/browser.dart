@@ -30,7 +30,7 @@ class Browser extends StatefulWidget {
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   static const platform = MethodChannel('co.zew.deebrowser.intent_data');
 
-  var _isRestored = false;
+  var _isRestored = true;
 
   @override
   void initState() {
@@ -44,8 +44,8 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
       if (url != null) {
         if (kDebugMode) {
           print("*********** Url in getIntendData is: $url");
+          print("### $mounted");
         }
-
         if (mounted) {
           var browserModel = Provider.of<BrowserModel>(context, listen: false);
           browserModel.addTab(WebViewTab(
