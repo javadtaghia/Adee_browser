@@ -30,15 +30,14 @@ class Browser extends StatefulWidget {
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   static const platform = MethodChannel('co.zew.deebrowser.intent_data');
 
-  var _isRestored = true;
+  var _isRestored = false;
 
   @override
   void initState() {
     super.initState();
-    getIntentData();
   }
 
-  getIntentData() async {
+  getIntentData(var browser) async {
     if (Util.isAndroid()) {
       String? url = await platform.invokeMethod("getIntentData");
       if (url != null) {
@@ -47,12 +46,10 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
           print("### $mounted");
         }
         if (mounted) {
-          var browserModel = Provider.of<BrowserModel>(context, listen: false);
-          browserModel.addTab(WebViewTab(
+          browser.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
-                url: WebUri(url),
-                settings: browserModel.getDefaultTabSettings()),
+                url: WebUri(url), settings: browser.getDefaultTabSettings()),
           ));
         }
       }
@@ -65,8 +62,9 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   }
 
   restore() async {
-    var browserModel = Provider.of<BrowserModel>(context, listen: true);
-    browserModel.restore();
+    var browser = Provider.of<BrowserModel>(context, listen: true);
+    await browser.restore();
+    await getIntentData(browser);
   }
 
   @override

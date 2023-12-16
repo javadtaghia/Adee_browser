@@ -23,6 +23,20 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
   final TextEditingController _customUserAgentController =
       TextEditingController();
 
+  bool enableZoom = true;
+  bool mediaAutoPlay = false;
+  bool hideImages = false;
+  double textSize = 8.0; // Default text size
+  String selectSearchEngine = 'Google'; // Default selection
+  final List<String> searchEngine = [
+    'Google',
+    'Bing',
+    'DuckDuckGo',
+    'Ecosia',
+    'Yahoo',
+    // Add more browser types if needed
+  ];
+
   @override
   void dispose() {
     _customHomePageController.dispose();
@@ -30,16 +44,158 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
     super.dispose();
   }
 
+  Widget _buildDropdownOption_old(var settings, var browserModel) {
+    return Card(
+        child: Center(
+            child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+      Icon(Icons.public),
+      Text('Search Engine'),
+      ListTile(
+        trailing: DropdownButton<SearchEngineModel>(
+          underline: Container(),
+          onChanged: (SearchEngineModel? value) {
+            setState(() {
+              if (value != null) {
+                settings.searchEngine = value;
+                browserModel.updateSettings(settings);
+              }
+            });
+          },
+          value: settings.searchEngine,
+          items: SearchEngines.map((searchEngine) {
+            return DropdownMenuItem(
+              value: searchEngine,
+              child: Text(searchEngine.name),
+            );
+          }).toList(),
+        ),
+      ),
+    ])));
+  }
+
+  Widget _buildDropdownOption(var settings, var browserModel) {
+    // Convert SearchEngineModel list to a list of Strings for DropdownButton<String>
+    List<String> searchEngineNames = SearchEngines.map((e) => e.name).toList();
+
+    // Find the currently selected search engine's name
+    String selectSearchEngine = settings.searchEngine.name;
+
+    return Card(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.public),
+            Text('Search Engine'),
+            ListTile(
+              trailing: DropdownButton<String>(
+                underline: Container(), // To remove the underline
+                icon: Icon(Icons.arrow_downward), // Customized arrow icon
+                value: selectSearchEngine,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    if (newValue != null) {
+                      // Find the SearchEngineModel corresponding to the selected name
+                      settings.searchEngine = SearchEngines.firstWhere(
+                          (searchEngine) => searchEngine.name == newValue,
+                          orElse: () => settings.searchEngine);
+                      browserModel.updateSettings(settings);
+                    }
+                  });
+                },
+                items: searchEngineNames
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchOption(String title, IconData icon, bool currentValue,
+      Function(bool) onChanged) {
+    return Card(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(icon),
+            Text(title),
+            Switch(
+              value: currentValue,
+              onChanged: onChanged,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSliderOption(String title, IconData icon, double currentValue,
+      Function(double) onChanged) {
+    return Card(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(icon),
+            Text(title),
+            Slider(
+              value: currentValue,
+              min: 6.0,
+              max: 42.0,
+              divisions: 40,
+              label: '${currentValue.round()}',
+              onChanged: onChanged,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
-    var children = _buildBaseSettings();
-    if (browserModel.webViewTabs.isNotEmpty) {
-      children.addAll(_buildWebViewTabSettings());
-    }
-
-    return ListView(
-      children: children,
+    var settings = browserModel.getSettings();
+    return Scaffold(
+      body: GridView.count(
+        crossAxisCount: 2,
+        children: <Widget>[
+          _buildSliderOption('Bigger Text', Icons.text_fields, textSize,
+              (value) {
+            setState(() {
+              textSize = value;
+            });
+          }),
+          _buildDropdownOption(settings, browserModel),
+          _buildSwitchOption(
+              'Hide Images', Icons.image_not_supported, hideImages, (value) {
+            setState(() {
+              hideImages = value;
+            });
+          }),
+          _buildSwitchOption('Enable Zooming', Icons.zoom_in, enableZoom,
+              (value) {
+            setState(() {
+              enableZoom = value;
+            });
+          }),
+          _buildSwitchOption(
+              'Pause AutoPlay', Icons.pause_circle_filled, mediaAutoPlay,
+              (value) {
+            setState(() {
+              mediaAutoPlay = value;
+            });
+          }),
+        ],
+      ),
     );
   }
 
