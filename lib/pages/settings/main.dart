@@ -57,43 +57,43 @@ class _SettingsPageState extends State<SettingsPage> {
               "Settings",
             ),
             actions: <Widget>[
-              PopupMenuButton<String>(
-                onSelected: _popupMenuChoiceAction,
-                itemBuilder: (context) {
-                  var items = [
-                    CustomPopupMenuItem<String>(
-                      enabled: true,
-                      value: PopupSettingsMenuActions.RESET_BROWSER_SETTINGS,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(PopupSettingsMenuActions
-                                .RESET_BROWSER_SETTINGS),
-                            Icon(
-                              Foundation.web,
-                              color: Colors.black,
-                            )
-                          ]),
-                    ),
-                    CustomPopupMenuItem<String>(
-                      enabled: true,
-                      value: PopupSettingsMenuActions.RESET_WEBVIEW_SETTINGS,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
-                            Text(PopupSettingsMenuActions
-                                .RESET_WEBVIEW_SETTINGS),
-                            Icon(
-                              MaterialIcons.web,
-                              color: Colors.black,
-                            )
-                          ]),
-                    )
-                  ];
+              // PopupMenuButton<String>(
+              //   onSelected: _popupMenuChoiceAction,
+              //   itemBuilder: (context) {
+              //     var items = [
+              //       CustomPopupMenuItem<String>(
+              //         enabled: true,
+              //         value: PopupSettingsMenuActions.RESET_BROWSER_SETTINGS,
+              //         child: Row(
+              //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //             children: const [
+              //               Text(PopupSettingsMenuActions
+              //                   .RESET_BROWSER_SETTINGS),
+              //               Icon(
+              //                 Foundation.web,
+              //                 color: Colors.black,
+              //               )
+              //             ]),
+              //       ),
+              //       CustomPopupMenuItem<String>(
+              //         enabled: true,
+              //         value: PopupSettingsMenuActions.RESET_WEBVIEW_SETTINGS,
+              //         child: Row(
+              //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //             children: const [
+              //               Text(PopupSettingsMenuActions
+              //                   .RESET_WEBVIEW_SETTINGS),
+              //               Icon(
+              //                 MaterialIcons.web,
+              //                 color: Colors.black,
+              //               )
+              //             ]),
+              //       )
+              //     ];
 
-                  return items;
-                },
-              )
+              //     return items;
+              //   },
+              // )
             ],
           ),
           body: const TabBarView(
