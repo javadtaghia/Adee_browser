@@ -138,8 +138,8 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
     var webViewController = currentWebViewModel.webViewController;
     textSize = currentWebViewModel.settings?.minimumFontSize?.toDouble() ?? 8.0;
-    //hideImages = currentWebViewModel.settings?.blockNetworkImage ?? false;
-    //enableZoom = currentWebViewModel.settings?.supportZoom ?? true;
+    hideImages = currentWebViewModel.settings?.blockNetworkImage ?? false;
+    enableZoom = currentWebViewModel.settings?.supportZoom ?? true;
     //mediaAutoPlay =
     // currentWebViewModel.settings?.mediaPlaybackRequiresUserGesture ?? true;
 
@@ -163,52 +163,51 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
           }),
           _buildDropdownOption(settings, browserModel),
           _buildSwitchOption(
-              'Hide Images', Icons.image_not_supported, hideImages, (value) {
-            //   async {
-            // currentWebViewModel.settings?.blockNetworkImage = value;
-            // webViewController?.setSettings(
-            //     settings:
-            //         currentWebViewModel.settings ?? InAppWebViewSettings());
-            // currentWebViewModel.settings =
-            //     await webViewController?.getSettings();
-            // browserModel.setDefaultTabSettings(currentWebViewModel);
-            // browserModel.save();
+              'Hide Images', Icons.image_not_supported, hideImages,
+              (value) async {
+            currentWebViewModel.settings?.blockNetworkImage = value;
+            webViewController?.setSettings(
+                settings:
+                    currentWebViewModel.settings ?? InAppWebViewSettings());
+            currentWebViewModel.settings =
+                await webViewController?.getSettings();
+            browserModel.setDefaultTabSettings(currentWebViewModel);
+            browserModel.save();
             setState(() {
               hideImages = value;
             });
           }),
           _buildSwitchOption('Enable Zooming', Icons.zoom_in, enableZoom,
-              (value) {
-            //   async {
-            // currentWebViewModel.settings?.supportZoom = value;
-            // webViewController?.setSettings(
-            //     settings:
-            //         currentWebViewModel.settings ?? InAppWebViewSettings());
-            // currentWebViewModel.settings =
-            //     await webViewController?.getSettings();
-            // browserModel.setDefaultTabSettings(currentWebViewModel);
-            // browserModel.save();
+              (value) async {
+            currentWebViewModel.settings?.supportZoom = value;
+            webViewController?.setSettings(
+                settings:
+                    currentWebViewModel.settings ?? InAppWebViewSettings());
+            currentWebViewModel.settings =
+                await webViewController?.getSettings();
+            browserModel.setDefaultTabSettings(currentWebViewModel);
+            browserModel.save();
             setState(() {
               enableZoom = value;
             });
           }),
-          _buildSwitchOption(
-              'Pause AutoPlay', Icons.pause_circle_filled, mediaAutoPlay,
-              (value) {
-            //     async {
-            // currentWebViewModel.settings?.mediaPlaybackRequiresUserGesture =
-            //     value;
-            // webViewController?.setSettings(
-            //     settings:
-            //         currentWebViewModel.settings ?? InAppWebViewSettings());
-            // currentWebViewModel.settings =
-            //     await webViewController?.getSettings();
-            // browserModel.setDefaultTabSettings(currentWebViewModel);
-            // browserModel.save();
-            setState(() {
-              mediaAutoPlay = value;
-            });
-          }),
+          // _buildSwitchOption(
+          //     'Pause AutoPlay', Icons.pause_circle_filled, mediaAutoPlay,
+          //     (value) {
+          //   //     async {
+          //   // currentWebViewModel.settings?.mediaPlaybackRequiresUserGesture =
+          //   //     value;
+          //   // webViewController?.setSettings(
+          //   //     settings:
+          //   //         currentWebViewModel.settings ?? InAppWebViewSettings());
+          //   // currentWebViewModel.settings =
+          //   //     await webViewController?.getSettings();
+          //   // browserModel.setDefaultTabSettings(currentWebViewModel);
+          //   // browserModel.save();
+          //   setState(() {
+          //     mediaAutoPlay = value;
+          //   });
+          // }),
         ],
       ),
     );
