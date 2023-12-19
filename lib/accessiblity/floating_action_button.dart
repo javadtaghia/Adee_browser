@@ -1,25 +1,5 @@
 import 'package:flutter/material.dart';
 
-class AccessibilityFAB extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const AccessibilityFAB({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return FloatingActionButton(
-      onPressed: onPressed,
-      child: const CircleAvatar(
-        backgroundColor: Colors.blue, // Change the color as needed
-        child: Icon(
-          Icons.accessibility,
-          color: Colors.white, // Change the icon color as needed
-        ),
-      ),
-    );
-  }
-}
-
 class MovableAccessibilityFAB extends StatefulWidget {
   final VoidCallback onPressed;
 
@@ -32,21 +12,35 @@ class MovableAccessibilityFAB extends StatefulWidget {
 }
 
 class _MovableAccessibilityFABState extends State<MovableAccessibilityFAB> {
-  double fabX = 100.0; // Initial X position
-  double fabY = 100.0; // Initial Y position
+  Offset fabPosition = const Offset(0, 0); // Initial position
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final screenHeight = MediaQuery.of(context).size.height;
+      const fabSize = 40.0; // Default FAB size, adjust if needed
+      setState(() {
+        fabPosition = Offset(
+            0 + fabSize, screenHeight - fabSize * 1.5); // Bottom left corner
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Positioned(
-          right: 0, // Align to the right edge of the screen
-          bottom: 0, // Align to the bottom edge of the screen
+          left: fabPosition.dx,
+          top: fabPosition.dy,
           child: GestureDetector(
             onPanUpdate: (details) {
               setState(() {
-                fabX += details.delta.dx;
-                fabY += details.delta.dy;
+                fabPosition = Offset(
+                  fabPosition.dx + details.delta.dx,
+                  fabPosition.dy + details.delta.dy,
+                );
               });
             },
             child: FloatingActionButton(

@@ -332,18 +332,19 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       },
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         var url = navigationAction.request.url;
-
         if (url != null &&
             !["http", "https", "file", "chrome", "data", "javascript", "about"]
                 .contains(url.scheme)) {
-          if (await canLaunchUrl(url)) {
-            // Launch the App
-            await launchUrl(
-              url,
-            );
-            // and cancel the request
-            return NavigationActionPolicy.CANCEL;
+          // await canLaunchUrl(url)
+          try {
+            await launchUrl(url);
+          } catch (e) {
+            if (kDebugMode) {
+              print("@@@@@@@@@@ I GOT url @@@@@@@@@$url$e");
+            }
           }
+          // and cancel the request
+          return NavigationActionPolicy.CANCEL;
         }
 
         return NavigationActionPolicy.ALLOW;
