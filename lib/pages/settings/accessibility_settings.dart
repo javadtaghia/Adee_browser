@@ -26,6 +26,7 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
   bool enableZoom = true;
   bool mediaAutoPlay = false;
   bool hideImages = false;
+  bool pauseAdBlock = false;
   double textSize = 8.0; // Default text size
   String selectSearchEngine = 'Google'; // Default selection
   final List<String> searchEngine = [
@@ -142,6 +143,12 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
     enableZoom = currentWebViewModel.settings?.supportZoom ?? true;
     //mediaAutoPlay =
     // currentWebViewModel.settings?.mediaPlaybackRequiresUserGesture ?? true;
+    var contentBlockers = currentWebViewModel.settings?.contentBlockers;
+    if (contentBlockers != null && contentBlockers.isNotEmpty) {
+      pauseAdBlock = false;
+    } else {
+      pauseAdBlock = true;
+    }
 
     return Scaffold(
       body: GridView.count(
@@ -208,6 +215,100 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
           //     mediaAutoPlay = value;
           //   });
           // }),
+
+          _buildSwitchOption('Pause AdBlock', Icons.pause, pauseAdBlock,
+              (value) async {
+            if (!pauseAdBlock) {
+              currentWebViewModel.settings?.contentBlockers = [];
+            } else {
+              final adUrlFilters = [
+                ".*.doubleclick.net/.*",
+                ".*.ads.pubmatic.com/.*",
+                ".*.googlesyndication.com/.*",
+                ".*.google-analytics.com/.*",
+                ".*.adservice.google.*/.*",
+                ".*.adbrite.com/.*",
+                ".*.exponential.com/.*",
+                ".*.quantserve.com/.*",
+                ".*.scorecardresearch.com/.*",
+                ".*.zedo.com/.*",
+                ".*.adsafeprotected.com/.*",
+                ".*.teads.tv/.*",
+                ".*.media.net/.*",
+                ".*.buysellads.com/.*",
+                ".*.revcontent.com/.*",
+                ".*.taboola.com/.*",
+                ".*.outbrain.com/.*",
+                ".*.infolinks.com/.*",
+                ".*.adroll.com/.*",
+                ".*.smaato.com/.*",
+                ".*.propellerads.com/.*",
+                ".*.conversantmedia.com/.*",
+                ".*.chitika.com/.*",
+                ".*.popads.net/.*",
+                ".*.popcash.net/.*",
+                ".*.adsterra.com/.*",
+                ".*.revenuehits.com/.*",
+                ".*.undertone.com/.*",
+                ".*.clicksor.com/.*",
+                ".*.mgid.com/.*",
+                ".*.epom.com/.*",
+                ".*.adblade.com/.*",
+                ".*.adnetwork.net/.*",
+                ".*.hilltopads.net/.*",
+                ".*.advertising.com/.*",
+                ".*.yandex.net/.*",
+                ".*.bidvertiser.com/.*",
+                ".*.adform.com/.*",
+                ".*.ad4game.com/.*",
+                ".*.adcolony.com/.*",
+                ".*.sovrn.com/.*",
+                ".*.triplelift.com/.*",
+                ".*.spotxchange.com/.*",
+                ".*.conversantmedia.eu/.*",
+                ".*.openx.net/.*",
+                ".*.pubmatic.com/.*",
+                ".*.gumgum.com/.*",
+                ".*.vibrantmedia.com/.*",
+                ".*.contextweb.com/.*",
+                ".*.exoclick.com/.*",
+                ".*.adnxs.com/.*",
+                ".*.adsymptotic.com/.*"
+              ];
+              List<ContentBlocker>? contentBlockers = [];
+              for (final adUrlFilter in adUrlFilters) {
+                contentBlockers.add(ContentBlocker(
+                    trigger: ContentBlockerTrigger(
+                      urlFilter: adUrlFilter,
+                    ),
+                    action: ContentBlockerAction(
+                      type: ContentBlockerActionType.BLOCK,
+                    )));
+              }
+
+              // Apply the "display: none" style to some HTML elements
+              contentBlockers.add(ContentBlocker(
+                  trigger: ContentBlockerTrigger(
+                    urlFilter: ".*",
+                  ),
+                  action: ContentBlockerAction(
+                      type: ContentBlockerActionType.CSS_DISPLAY_NONE,
+                      selector: ".banner, .banners, .ads, .ad, .advert")));
+
+              currentWebViewModel.settings?.contentBlockers = contentBlockers;
+            }
+
+            webViewController?.setSettings(
+                settings:
+                    currentWebViewModel.settings ?? InAppWebViewSettings());
+            currentWebViewModel.settings =
+                await webViewController?.getSettings();
+            browserModel.setDefaultTabSettings(currentWebViewModel);
+            browserModel.save();
+            setState(() {
+              pauseAdBlock = value;
+            });
+          }),
         ],
       ),
     );
