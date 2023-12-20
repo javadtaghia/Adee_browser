@@ -157,15 +157,18 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
           _buildSliderOption('Bigger Text', Icons.text_fields, textSize,
               (value) async {
             currentWebViewModel.settings?.minimumFontSize = value.round();
-            webViewController?.setSettings(
-                settings:
-                    currentWebViewModel.settings ?? InAppWebViewSettings());
-            currentWebViewModel.settings =
-                await webViewController?.getSettings();
-            browserModel.setDefaultTabSettings(currentWebViewModel);
-            browserModel.save();
+            try {
+              webViewController?.setSettings(
+                  settings:
+                      currentWebViewModel.settings ?? InAppWebViewSettings());
+              var webSet = await webViewController?.getSettings();
+              currentWebViewModel.settings = webSet;
+            } catch (e) {}
+
             setState(() {
               textSize = value;
+              browserModel.setDefaultTabSettings(currentWebViewModel);
+              browserModel.save();
             });
           }),
           _buildDropdownOption(settings, browserModel),
@@ -173,29 +176,37 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
               'Hide Images', Icons.image_not_supported, hideImages,
               (value) async {
             currentWebViewModel.settings?.blockNetworkImage = value;
-            webViewController?.setSettings(
-                settings:
-                    currentWebViewModel.settings ?? InAppWebViewSettings());
-            currentWebViewModel.settings =
-                await webViewController?.getSettings();
-            browserModel.setDefaultTabSettings(currentWebViewModel);
-            browserModel.save();
+            try {
+              webViewController?.setSettings(
+                  settings:
+                      currentWebViewModel.settings ?? InAppWebViewSettings());
+              var webSet = await webViewController?.getSettings();
+              currentWebViewModel.settings = webSet;
+            } catch (e) {}
+
             setState(() {
+              browserModel.setDefaultTabSettings(currentWebViewModel);
+              browserModel.save();
               hideImages = value;
+              browserModel.updateSettings(settings);
             });
           }),
           _buildSwitchOption('Enable Zooming', Icons.zoom_in, enableZoom,
               (value) async {
             currentWebViewModel.settings?.supportZoom = value;
-            webViewController?.setSettings(
-                settings:
-                    currentWebViewModel.settings ?? InAppWebViewSettings());
-            currentWebViewModel.settings =
-                await webViewController?.getSettings();
-            browserModel.setDefaultTabSettings(currentWebViewModel);
-            browserModel.save();
+            try {
+              webViewController?.setSettings(
+                  settings:
+                      currentWebViewModel.settings ?? InAppWebViewSettings());
+              var webSet = await webViewController?.getSettings();
+              currentWebViewModel.settings = webSet;
+            } catch (e) {}
+
             setState(() {
+              browserModel.setDefaultTabSettings(currentWebViewModel);
+              browserModel.save();
               enableZoom = value;
+              browserModel.updateSettings(settings);
             });
           }),
           // _buildSwitchOption(
@@ -222,58 +233,92 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
               currentWebViewModel.settings?.contentBlockers = [];
             } else {
               final adUrlFilters = [
-                ".*.doubleclick.net/.*",
-                ".*.ads.pubmatic.com/.*",
-                ".*.googlesyndication.com/.*",
-                ".*.google-analytics.com/.*",
-                ".*.adservice.google.*/.*",
+                ".*.cdn-test.mouseflow.com/.*",
+                ".*.identify.hotjar.com/.*",
+                ".*.static.media media.net/.*",
+                ".*.claritybt.freshmarketer.com/.*",
+                ".*.mediavisor.doubleclick.net/.*",
+                ".*.events3alt.adcolony.com/.*",
+                ".*.analytics.google.com/.*",
+                ".*.stats.g.doubleclick.net/.*",
+                ".*.adtago.s3.amazonaws.com/.*",
+                ".*.w1.luckyorange.com/.*",
+                ".*.careers.hotjar.com/.*",
                 ".*.adbrite.com/.*",
+                ".*.m.doubleclick.net/.*",
+                ".*.analytics.pointdrive.linkedin.com/.*",
+                ".*.googlesyndication.com/.*",
                 ".*.exponential.com/.*",
-                ".*.quantserve.com/.*",
-                ".*.scorecardresearch.com/.*",
+                ".*.log.pinterest.com/.*",
+                ".*.o2.mouseflow.com/.*",
+                ".*.adc3-launch.adcolony.com/.*",
+                ".*.gtm.mouseflow.com/.*",
+                ".*.analytics.s3.amazonaws.com/.*",
+                ".*.mouseflow.com/.*",
+                ".*.insights.hotjar.com/.*",
                 ".*.zedo.com/.*",
-                ".*.adsafeprotected.com/.*",
-                ".*.teads.tv/.*",
+                ".*.static.doubleclick.net/.*",
+                ".*.adm.hotjar.com/.*",
+                ".*.events.hotjar.io/.*",
+                ".*.events.reddit.com/.*",
+                ".*.adservetx.media.net/.*",
+                ".*.widgets.pinterest.com/.*",
+                ".*.scorecardresearch.com/.*",
+                ".*.cdn.mouseflow.com/.*",
+                ".*.cdn.luckyorange.com/.*",
+                ".*.click.googleanalytics.com/.*",
+                ".*.settings.luckyorange.net/.*",
+                ".*.realtime.luckyorange.com/.*",
+                ".*.doubleclick.net/.*",
+                ".*.api.mouseflow.com/.*",
+                ".*.tools.mouseflow.com/.*",
+                ".*.ssl.google-analytics.com/.*",
+                ".*.api.luckyorange.com/.*",
+                ".*.analyticsengine.s3.amazonaws.com/.*",
+                ".*.adsymptotic.com/.*",
+                ".*.adservice.google.com/.*",
+                ".*.ads.pubmatic.com/.*",
+                ".*.afs.googlesyndication.com/.*",
+                ".*.pagead2.googleadservices.com/.*",
+                ".*.ads.linkedin.com/.*",
+                ".*.analytics.pinterest.com/.*",
+                ".*.events.redditmedia.com/.*",
+                ".*.script.hotjar.com/.*",
+                ".*.cs.luckyorange.net/.*",
+                ".*.fwtracks.freshmarketer.com/.*",
+                ".*.ads.pinterest.com/.*",
+                ".*.quantserve.com/.*",
+                ".*.google-analytics.com/.*",
+                ".*.advertising-api-eu.amazon.com/.*",
+                ".*.surveys.hotjar.com/.*",
+                ".*.advice-ads.s3.amazonaws.com/.*",
+                ".*.ad.doubleclick.net/.*",
+                ".*.stats.wp.com/.*",
+                ".*.trk.pinterest.com/.*",
+                ".*.freshmarketer.com/.*",
+                ".*.upload.luckyorange.net/.*",
+                ".*.adservice.google.*/.*",
+                ".*.app-measurement.com/.*",
+                ".*.pagead2.googlesyndication.com/.*",
+                ".*.ads30.adcolony.com/.*",
+                ".*.wd.adcolony.com/.*",
+                ".*.events.reddit.com/.*",
+                ".*.static.ads-twitter.com/.*",
+                ".*.ads-api.twitter.com/.*",
+                ".*.ads.pinterest.com/.*",
+                ".*.log.pinterest.com/.*",
+                ".*.analytics.pinterest.com/.*",
+                ".*.widgets.pinterest.com/.*",
                 ".*.media.net/.*",
-                ".*.buysellads.com/.*",
-                ".*.revcontent.com/.*",
-                ".*.taboola.com/.*",
-                ".*.outbrain.com/.*",
-                ".*.infolinks.com/.*",
-                ".*.adroll.com/.*",
-                ".*.smaato.com/.*",
-                ".*.propellerads.com/.*",
-                ".*.conversantmedia.com/.*",
-                ".*.chitika.com/.*",
-                ".*.popads.net/.*",
-                ".*.popcash.net/.*",
-                ".*.adsterra.com/.*",
-                ".*.revenuehits.com/.*",
-                ".*.undertone.com/.*",
-                ".*.clicksor.com/.*",
-                ".*.mgid.com/.*",
-                ".*.epom.com/.*",
-                ".*.adblade.com/.*",
-                ".*.adnetwork.net/.*",
-                ".*.hilltopads.net/.*",
-                ".*.advertising.com/.*",
-                ".*.yandex.net/.*",
-                ".*.bidvertiser.com/.*",
-                ".*.adform.com/.*",
-                ".*.ad4game.com/.*",
-                ".*.adcolony.com/.*",
-                ".*.sovrn.com/.*",
-                ".*.triplelift.com/.*",
-                ".*.spotxchange.com/.*",
-                ".*.conversantmedia.eu/.*",
-                ".*.openx.net/.*",
-                ".*.pubmatic.com/.*",
-                ".*.gumgum.com/.*",
-                ".*.vibrantmedia.com/.*",
-                ".*.contextweb.com/.*",
-                ".*.exoclick.com/.*",
-                ".*.adnxs.com/.*",
-                ".*.adsymptotic.com/.*"
+                ".*static.media.net/.*",
+                ".*.luckyorange.com/.*",
+                ".*.pixel.facebook.com/.*",
+                ".*.an.facebook.com/.*",
+                ".*.notify.bugsnag.com/.*",
+                ".*.sessions.bugsnag.com/.*",
+                ".*.api.bugsnag.com/.*",
+                ".*.app.bugsnag.com/.*",
+                ".*.browser.sentry-cdn.com/.*"
               ];
               List<ContentBlocker>? contentBlockers = [];
               for (final adUrlFilter in adUrlFilters) {
@@ -297,16 +342,19 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
 
               currentWebViewModel.settings?.contentBlockers = contentBlockers;
             }
+            try {
+              webViewController?.setSettings(
+                  settings:
+                      currentWebViewModel.settings ?? InAppWebViewSettings());
+              var webSet = await webViewController?.getSettings();
+              currentWebViewModel.settings = webSet;
+            } catch (e) {}
 
-            webViewController?.setSettings(
-                settings:
-                    currentWebViewModel.settings ?? InAppWebViewSettings());
-            currentWebViewModel.settings =
-                await webViewController?.getSettings();
-            browserModel.setDefaultTabSettings(currentWebViewModel);
-            browserModel.save();
             setState(() {
+              browserModel.setDefaultTabSettings(currentWebViewModel);
+              browserModel.save();
               pauseAdBlock = value;
+              browserModel.updateSettings(settings);
             });
           }),
         ],
