@@ -4,7 +4,7 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
-import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import 'animated_flutter_browser_logo.dart';
@@ -49,7 +49,7 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           text: const TextSpan(children: [
             TextSpan(text: "Github: ", style: TextStyle(color: Colors.black)),
             TextSpan(
-                text: "adee/flutter_adeeinappwebview",
+                text: "adee/flutter_inappwebview",
                 style: TextStyle(color: Colors.deepPurple))
           ]),
         ),
@@ -59,8 +59,7 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
             key: GlobalKey(),
             webViewModel: WebViewModel(
                 settings: browserModel.getDefaultTabSettings(),
-                url:
-                    WebUri("https://github.com/adee/flutter_adeeinappwebview")),
+                url: WebUri("https://github.com/adee/flutter_inappwebview")),
           ));
           Navigator.pop(context);
         },

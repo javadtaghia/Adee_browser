@@ -6,7 +6,7 @@ import 'package:flutter_browser/pages/settings/android_settings.dart';
 import 'package:flutter_browser/pages/settings/cross_platform_settings.dart';
 import 'package:flutter_browser/pages/settings/ios_settings.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
-import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import '../../custom_popup_menu_item.dart';

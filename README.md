@@ -41,3 +41,8 @@ Note: To debug run:
 ```bash
 flutter run
 ```
+
+To update pub
+```bash
+flutter pub upgrade
+```

@@ -16,7 +16,7 @@ import 'package:flutter_browser/pages/settings/main.dart';
 import 'package:flutter_browser/tab_popup_menu_actions.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
-import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_extend/share_extend.dart';

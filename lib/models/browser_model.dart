@@ -5,8 +5,8 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
-import 'package:flutter_adeeinappwebview_platform_interface/src/in_app_webview/in_app_webview_settings.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_inappwebview_platform_interface/src/in_app_webview/in_app_webview_settings.dart';
 import 'package:flutter_browser/models/web_archive_model.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
