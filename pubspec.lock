@@ -126,62 +126,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_adeeinappwebview:
-    dependency: "direct main"
-    description:
-      name: flutter_adeeinappwebview
-      sha256: "2001b3797c7bf3acaa20c3b5a9e7429d2c46f01d02d6d87b1849f0458b1cf853"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.0-beta.32"
-  flutter_adeeinappwebview_android:
-    dependency: transitive
-    description:
-      name: flutter_adeeinappwebview_android
-      sha256: c5ff3fae502bceace92df1bda02df4d2c142367e56a3ff1e479f06630897bc3f
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.6"
-  flutter_adeeinappwebview_internal_annotations:
-    dependency: transitive
-    description:
-      name: flutter_adeeinappwebview_internal_annotations
-      sha256: "4bad34b87eb1b8b839d0739dc37673a2527cca8e713d5b690eed70a9d1b2723a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.1"
-  flutter_adeeinappwebview_ios:
-    dependency: transitive
-    description:
-      name: flutter_adeeinappwebview_ios
-      sha256: b733118e7fc6078783ef3a57418407be21116a7063d7f3b98f4c3fb5217ded7e
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.5"
-  flutter_adeeinappwebview_macos:
-    dependency: transitive
-    description:
-      name: flutter_adeeinappwebview_macos
-      sha256: "1951361d7605db33d483922aa94667488ddbc1cd3c39c99cd057c7e231a76050"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.3"
-  flutter_adeeinappwebview_platform_interface:
-    dependency: transitive
-    description:
-      name: flutter_adeeinappwebview_platform_interface
-      sha256: "0507a8d557a1a3544ac80c377f1f10aff43567fd995e1521e055d359a46fff30"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
-  flutter_adeeinappwebview_web:
-    dependency: transitive
-    description:
-      name: flutter_adeeinappwebview_web
-      sha256: "517f9ca160c72b62ee17bfb493b315e9da55c1ffb129304be3126c9631656e5a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   flutter_colorpicker:
     dependency: "direct main"
     description:
@@ -214,6 +158,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.5"
+  flutter_inappwebview:
+    dependency: "direct main"
+    description:
+      name: flutter_inappwebview
+      sha256: "9b870dc009186241ebe6238a79a0a1431a5aaa10d98637efacf33d2bd5e295a3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0-rc.2"
+  flutter_inappwebview_android:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_android
+      sha256: "931f9fded8878e99daf25b6d9dc9f53f4192ac543433bdaac648dd008dac7829"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.10"
+  flutter_inappwebview_internal_annotations:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_internal_annotations
+      sha256: "5f80fd30e208ddded7dbbcd0d569e7995f9f63d45ea3f548d8dd4c0b473fb4c8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
+  flutter_inappwebview_ios:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_ios
+      sha256: feda3eaf6257f547343a596329ba07c5d0bd9ce73cb91330086ce9bb72a1ce54
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.11"
+  flutter_inappwebview_macos:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_macos
+      sha256: "9d44d8ac62dfc17e8124485179339003cd3e4661444572308c0de39814632a34"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.9"
+  flutter_inappwebview_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_platform_interface
+      sha256: "08b7263382609d8363a9741bd95bd9703a95357ca9a40b6b4edfa0b1c36d1da7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.8"
+  flutter_inappwebview_web:
+    dependency: transitive
+    description:
+      name: flutter_inappwebview_web
+      sha256: b4f59c645f192b04989b3496df6df5e2fe58275acb61349031a8863730b6ce60
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.6"
   flutter_lints:
     dependency: "direct dev"
     description:

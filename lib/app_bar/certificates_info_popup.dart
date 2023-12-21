@@ -8,7 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';

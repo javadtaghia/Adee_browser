@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class WebViewModel extends ChangeNotifier {
   int? _tabIndex;

@@ -38,7 +38,7 @@ class PopupMenuActions {
     FIND_ON_PAGE,
     // WEB_ARCHIVES,
     SETTINGS,
-    DESKTOP_MODE,
+    // DESKTOP_MODE,
     COPY_CURRENT_URL,
     EXIT_APP,
   ];

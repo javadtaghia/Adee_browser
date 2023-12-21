@@ -78,7 +78,7 @@
             android:value="2" />
 
         <provider
-        android:name="ai.adee.flutter_adeeinappwebview_android.InAppWebViewFileProvider"
+        android:name="com.pichillilorenzo.flutter_inappwebview_android.InAppWebViewFileProvider"
         android:authorities="co.zew.deebrowser.fileprovider"
         android:exported="false"
         android:grantUriPermissions="true">
