@@ -279,15 +279,20 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         if (url != null) {
           var uri = Uri.parse(widget.hitTestResult.extra!);
           String path = uri.path;
-          String fileName = path.substring(path.lastIndexOf('/') + 1);
-          Directory? directory = await getExternalStorageDirectory();
+          String fileName = path.substring(path.lastIndexOf(/) + 1);
           String _dir = "";
-          if (directory!.path.contains("/storage/emulated/0/") &&
-              Util.isAndroid()) {
-            _dir = '/storage/emulated/0/Download';
-          } else {
-            _dir = directory!.path;
+          if (Platform.isAndroid) {
+            Directory? directory = await getExternalStorageDirectory();
+            if (directory!.path.contains("/storage/emulated/0/") &&
+                Util.isAndroid()) {
+              _dir = /storage/emulated/0/Download;
+            } else {
+              _dir = directory.path;
+            }
+          } else if (Platform.isIOS) {
+            _dir = (await getApplicationDocumentsDirectory()).path;
           }
+
           await FlutterDownloader.enqueue(
             url: url.toString(),
             fileName: fileName,
@@ -296,6 +301,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
             openFileFromNotification: true,
           );
         }
+
         if (mounted) {
           Navigator.pop(context);
         }
