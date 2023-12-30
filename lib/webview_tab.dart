@@ -332,11 +332,23 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       },
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         var url = navigationAction.request.url;
+
         if (url != null &&
             !["http", "https", "file", "chrome", "data", "javascript", "about"]
                 .contains(url.scheme)) {
           // await canLaunchUrl(url)
+          if (url.scheme == "intent" &&
+              url.toString().startsWith("intent://www.google.com/maps")) {
+            var replacedUrl =
+                url.toString().replaceFirst("intent://", "https://");
+            await launchUrl(Uri.parse(replacedUrl),
+                mode: LaunchMode.externalApplication);
+            return NavigationActionPolicy.CANCEL;
+          }
           try {
+            if (kDebugMode) {
+              print("## launching ... ${url.scheme}");
+            }
             await launchUrl(url);
           } catch (e) {
             if (kDebugMode) {
