@@ -192,38 +192,79 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
       height: 40.0,
       child: Stack(
         children: <Widget>[
-          TextField(
-            onSubmitted: (value) {
-              var url = WebUri(formatUrl(value.trim()));
-              if (!url.scheme.startsWith("http") &&
-                  !Util.isLocalizedContent(url)) {
-                url = WebUri(settings.searchEngine.searchUrl + value);
+          Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text.length < 5) {
+                return const Iterable<String>.empty();
               }
-
-              if (webViewController != null) {
-                webViewController.loadUrl(urlRequest: URLRequest(url: url));
-              } else {
-                addNewTab(url: url);
-                webViewModel.url = url;
+              if (kDebugMode) {
+                print('### text to AI is:${textEditingValue.text}');
               }
+              return getOpenAIAutocomplete(
+                  textEditingValue.text); // Replace with
             },
-            keyboardType: TextInputType.url,
-            focusNode: _focusNode,
-            autofocus: false,
-            controller: _searchController,
-            textInputAction: TextInputAction.go,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.only(
-                  left: 45.0, top: 10.0, right: 10.0, bottom: 10.0),
-              filled: true,
-              fillColor: Colors.white,
-              border: outlineBorder,
-              focusedBorder: outlineBorder,
-              enabledBorder: outlineBorder,
-              hintText: "Search for or type a web address",
-              hintStyle: const TextStyle(color: Colors.black54, fontSize: 16.0),
-            ),
-            style: const TextStyle(color: Colors.black, fontSize: 16.0),
+            onSelected: (String selection) {
+              _searchController!.text = selection;
+              // var url = WebUri(formatUrl(selection.trim()));
+              // if (!url.scheme.startsWith("http") &&
+              //     !Util.isLocalizedContent(url)) {
+
+              // } else if ()
+
+              // if (webViewController != null) {
+              //   webViewController.loadUrl(urlRequest: URLRequest(url: url));
+              // } else {
+              //   addNewTab(url: url);
+              //   webViewModel.url = url;
+              // }
+            },
+            fieldViewBuilder: (BuildContext context,
+                TextEditingController _searchController,
+                FocusNode _focusNode,
+                VoidCallback onFieldSubmitted) {
+              return TextField(
+                controller: _searchController,
+                focusNode: _focusNode,
+                onTap: () {
+                  _searchController!.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: _searchController!.text.length,
+                  );
+                },
+                keyboardType: TextInputType.url,
+                autofocus: false,
+                textInputAction: TextInputAction.go,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.only(
+                      left: 45.0, top: 10.0, right: 10.0, bottom: 10.0),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border:
+                      OutlineInputBorder(), // Replace with your outlineBorder
+                  focusedBorder:
+                      OutlineInputBorder(), // Replace with your outlineBorder
+                  enabledBorder:
+                      OutlineInputBorder(), // Replace with your outlineBorder
+                  hintText: "Search for or type a web address",
+                  hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
+                ),
+                style: const TextStyle(color: Colors.black, fontSize: 16.0),
+                onSubmitted: (value) {
+                  var url = WebUri(formatUrl(value.trim()));
+                  if (!url.scheme.startsWith("http") &&
+                      !Util.isLocalizedContent(url)) {
+                    url = WebUri(settings.searchEngine.searchUrl + value);
+                  }
+
+                  if (webViewController != null) {
+                    webViewController.loadUrl(urlRequest: URLRequest(url: url));
+                  } else {
+                    addNewTab(url: url);
+                    webViewModel.url = url;
+                  }
+                },
+              );
+            },
           ),
           IconButton(
             icon: Selector<WebViewModel, bool>(
@@ -254,6 +295,36 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         ],
       ),
     );
+  }
+
+  Future<List<String>> getOpenAIAutocomplete(String input) async {
+    const endpoint =
+        'https://api.openai.com/v1/engines/text-davinci-002/completions';
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer sk-API',
+    };
+
+    final data = {
+      'prompt': 'Complete the following user search query: $input',
+      'max_tokens': 20,
+      'temperature':
+          0.3, // Adjust based on how deterministic you want the results to be
+    };
+
+    final response = await http.post(Uri.parse(endpoint),
+        headers: headers, body: json.encode(data));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseBody = json.decode(response.body);
+      final List<dynamic> completions = responseBody['choices'];
+      // Cast each element to String explicitly and return
+      final List<String> suggestions =
+          completions.map((c) => c['text'].toString().trim()).toList();
+      return suggestions;
+    } else {
+      throw Exception('Failed to get autocomplete suggestions');
+    }
   }
 
   List<Widget> _buildActionsMenu() {
