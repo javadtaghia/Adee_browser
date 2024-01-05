@@ -120,7 +120,7 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
             Text(title),
             Slider(
               value: currentValue,
-              min: 6.0,
+              min: 8.0,
               max: 42.0,
               divisions: 40,
               label: '${currentValue.round()}',
@@ -138,6 +138,12 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
     var settings = browserModel.getSettings();
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
     var webViewController = currentWebViewModel.webViewController;
+
+    if (webViewController == null) {
+      return const Scaffold(
+          body: Center(child: Text("Open a new tab to see the settings.")));
+    }
+
     textSize = currentWebViewModel.settings?.minimumFontSize?.toDouble() ?? 8.0;
     hideImages = currentWebViewModel.settings?.blockNetworkImage ?? false;
     enableZoom = currentWebViewModel.settings?.supportZoom ?? true;

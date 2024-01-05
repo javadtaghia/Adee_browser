@@ -147,6 +147,7 @@ class FlutterBrowserApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Adee Browser',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
