@@ -76,7 +76,7 @@ class WebViewSettings {
 
   WebViewSettings(
       {this.minimumFontSize = 8,
-      this.supportZoom = false,
+      this.supportZoom = true,
       this.standardFontFamily = "sans-serif",
       this.mediaPlaybackRequiresUserGesture = true,
       this.blockNetworkImage = false});
@@ -244,6 +244,10 @@ class BrowserModel extends ChangeNotifier {
             selector: ".banner, .banners, .ads, .ad, .advert")));
 
     _currentWebViewModel.settings?.contentBlockers = contentBlockers;
+    if (kDebugMode) {
+      print(
+          "@@@ I just did add the adblocks${_currentWebViewModel.settings!.contentBlockers}");
+    }
 
     try {
       _currentWebViewModel.webViewController?.setSettings(
