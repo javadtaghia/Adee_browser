@@ -204,7 +204,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                   textEditingValue.text); // Replace with
             },
             onSelected: (String selection) {
-              _searchController!.text = selection;
+              _searchController!.text = selection.replaceAll('"', '');
             },
             fieldViewBuilder: (BuildContext context,
                 TextEditingController? searchController,
@@ -295,7 +295,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer sk-test', // Replace with your actual API key
+      'Authorization': 'Bearer sk-API', // Replace with your actual API key
     };
 
     final data = {
@@ -304,11 +304,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         {
           'role': 'user',
           'content':
-              "User searches for $input; create a propser search suggestion provide only one suggestion"
+              " based on '$input' create a propser search suggestion to be asked from google; provide only one suggestion"
         }
       ],
-      'max_tokens': 20,
-      'temperature': 0.3,
+      'max_tokens': 30,
+      'temperature': 0.5,
       // Include any other parameters as per the latest API documentation
     };
 
