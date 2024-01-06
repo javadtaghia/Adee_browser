@@ -279,13 +279,18 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         if (url != null) {
           var uri = Uri.parse(widget.hitTestResult.extra!);
           String path = uri.path;
-          String fileName = path.substring(path.lastIndexOf(/) + 1);
+          // filename not parsing properly.
+          // print(path.substring(path.lastIndexOf('/') + 1))
+          String fileName = path.substring(path.lastIndexOf('/') + 1);
+          if (!RegExp(r'\.[a-zA-Z]+$').hasMatch(fileName)) {
+            fileName = fileName + '.jpeg';
+          } 
           String _dir = "";
           if (Platform.isAndroid) {
             Directory? directory = await getExternalStorageDirectory();
             if (directory!.path.contains("/storage/emulated/0/") &&
                 Util.isAndroid()) {
-              _dir = /storage/emulated/0/Download;
+              _dir = '/storage/emulated/0/Download';
             } else {
               _dir = directory.path;
             }
@@ -293,7 +298,6 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
             _dir = (await getApplicationDocumentsDirectory()).path;
           }
           
-
           await FlutterDownloader.enqueue(
             url: url.toString(),
             fileName: fileName,
