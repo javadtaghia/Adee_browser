@@ -292,6 +292,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
           } else if (Platform.isIOS) {
             _dir = (await getApplicationDocumentsDirectory()).path;
           }
+          
 
           await FlutterDownloader.enqueue(
             url: url.toString(),
