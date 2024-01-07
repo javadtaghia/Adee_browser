@@ -279,9 +279,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         if (url != null) {
           var uri = Uri.parse(widget.hitTestResult.extra!);
           String path = uri.path;
-          // filename not parsing properly.
-          // print(path.substring(path.lastIndexOf('/') + 1))
           String fileName = path.substring(path.lastIndexOf('/') + 1);
+          // need to check if .jpeg extension is always the go to if filename doesnt have ext
+          // need to generate a unique name each time file is saved otherwise it is overwritten
           if (!RegExp(r'\.[a-zA-Z]+$').hasMatch(fileName)) {
             fileName = fileName + '.jpeg';
           } 
