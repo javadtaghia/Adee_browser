@@ -295,7 +295,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer sk-API', // Replace with your actual API key
+      'Authorization': 'Bearer sk-api', // Replace with your actual API key
     };
 
     final data = {
@@ -504,22 +504,22 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
                   var children = <Widget>[];
 
-                  if (Util.isIOS()) {
-                    children.add(
-                      SizedBox(
-                          width: 35.0,
-                          child: IconButton(
-                              padding: const EdgeInsets.all(0.0),
-                              icon: const Icon(
-                                Icons.arrow_back,
-                                color: Colors.black,
-                              ),
-                              onPressed: () {
-                                webViewController?.goBack();
-                                Navigator.pop(popupMenuContext);
-                              })),
-                    );
-                  }
+                  // if (Util.isIOS()) {
+                  //   children.add(
+                  //     SizedBox(
+                  //         width: 35.0,
+                  //         child: IconButton(
+                  //             padding: const EdgeInsets.all(0.0),
+                  //             icon: const Icon(
+                  //               Icons.arrow_back,
+                  //               color: Colors.black,
+                  //             ),
+                  //             onPressed: () {
+                  //               webViewController?.goBack();
+                  //               Navigator.pop(popupMenuContext);
+                  //             })),
+                  //   );
+                  // }
 
                   children.addAll([
                     SizedBox(
@@ -954,7 +954,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         break;
       case PopupMenuActions.EXIT_APP:
         Future.delayed(const Duration(milliseconds: 300), () {
-          SystemNavigator.pop();
+          if (Util.isIOS()) {
+            exit(0);
+          } else {
+            SystemNavigator.pop();
+          }
         });
         break;
       case PopupMenuActions.COPY_CURRENT_URL:
@@ -1215,6 +1219,40 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     );
   }
 
+  // Function to limit text to 1000 words
+  String limitTo1000Words(String text) {
+    var words = text.split(' ');
+    if (words.length > 1000) {
+      return words.take(1000).join(' ');
+    }
+    return text;
+  }
+
+// Function to get summary from OpenAI
+  Future<String> getSummary(String text) async {
+    var apiKey = 'sk-api'; // Replace with your API key
+    var url = Uri.parse(
+        'https://api.openai.com/v1/engines/gpt-3.5-turbo/completions');
+    var response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'prompt': 'Summarize the following text:\n\n$text',
+        'max_tokens': 100, // Adjust based on your needs
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      return data['choices'][0]['text'].trim();
+    } else {
+      throw Exception('Failed to get summary');
+    }
+  }
+
   void _speak(String text, FlutterTts flutterTts) async {
     bool isSpeaking = false;
 
@@ -1294,9 +1332,17 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               'title, h1, h2, h3, h4, h5, h6, h7, p, texarea');
 
           var text = elements.map((e) => e.text).join("\n");
+
+          //summary
+          //  var limitedText = limitTo1000Words(text);
+          //var summary = await getSummary("hello ");
+          // var summary = limitedText;
           if (kDebugMode) {
-            print("### TEXT ### $text");
+            //  print("### SUMMARY ###\n$summary\n");
+            print("### TEXT ###\n$text");
           }
+//
+          //  text = "SUMMARY \n$summary\nORIGINAL TEXT$text";
 
           // Convert the elements to a list of widgets
           List<Widget> elementWidgets = elements.map((element) {
@@ -1366,6 +1412,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             },
           ).then((value) async {
             // This code runs after the dialog is dismissed
+            _speak('', flutterTts!);
             _stopSpeak(flutterTts);
             flutterTts = null; // Stop speaking when the dialog is closed
           });
