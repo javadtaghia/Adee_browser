@@ -295,7 +295,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer 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', // Replace with your actual API key
+      'Authorization': 'Bearer sk-api', // Replace with your actual API key
     };
 
     final data = {
