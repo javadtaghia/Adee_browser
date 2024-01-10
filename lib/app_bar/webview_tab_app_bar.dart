@@ -204,7 +204,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                   textEditingValue.text); // Replace with
             },
             onSelected: (String selection) {
-               _searchController!.text = selection.replaceAll('"', '');
+              _searchController!.text = selection.replaceAll('"', '');
             },
             fieldViewBuilder: (BuildContext context,
                 TextEditingController? searchController,
@@ -304,7 +304,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         {
           'role': 'user',
           'content':
-              "User searches for $input; create a propser search suggestion provide only one suggestion"
+              " based on '$input' create a propser search suggestion to be asked from google; provide only one suggestion"
         }
       ],
       'max_tokens': 30,
@@ -855,7 +855,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 );
               case PopupMenuActions.EXIT_APP:
                 return CustomPopupMenuItem<String>(
-                  enabled:  true ,
+                  enabled: true,
                   value: choice,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -954,12 +954,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         break;
       case PopupMenuActions.EXIT_APP:
         Future.delayed(const Duration(milliseconds: 300), () {
-           if (Util.isIOS()) {
+          if (Util.isIOS()) {
             exit(0);
-           } else {
-             SystemNavigator.pop();
-           }
-         
+          } else {
+            SystemNavigator.pop();
+          }
         });
         break;
       case PopupMenuActions.COPY_CURRENT_URL:
@@ -1220,6 +1219,40 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     );
   }
 
+  // Function to limit text to 1000 words
+  String limitTo1000Words(String text) {
+    var words = text.split(' ');
+    if (words.length > 1000) {
+      return words.take(1000).join(' ');
+    }
+    return text;
+  }
+
+// Function to get summary from OpenAI
+  Future<String> getSummary(String text) async {
+    var apiKey = 'sk-api'; // Replace with your API key
+    var url = Uri.parse(
+        'https://api.openai.com/v1/engines/gpt-3.5-turbo/completions');
+    var response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'prompt': 'Summarize the following text:\n\n$text',
+        'max_tokens': 100, // Adjust based on your needs
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      return data['choices'][0]['text'].trim();
+    } else {
+      throw Exception('Failed to get summary');
+    }
+  }
+
   void _speak(String text, FlutterTts flutterTts) async {
     bool isSpeaking = false;
 
@@ -1299,9 +1332,17 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               'title, h1, h2, h3, h4, h5, h6, h7, p, texarea');
 
           var text = elements.map((e) => e.text).join("\n");
+
+          //summary
+          //  var limitedText = limitTo1000Words(text);
+          //var summary = await getSummary("hello ");
+          // var summary = limitedText;
           if (kDebugMode) {
-            print("### TEXT ### $text");
+            //  print("### SUMMARY ###\n$summary\n");
+            print("### TEXT ###\n$text");
           }
+//
+          //  text = "SUMMARY \n$summary\nORIGINAL TEXT$text";
 
           // Convert the elements to a list of widgets
           List<Widget> elementWidgets = elements.map((element) {
@@ -1371,7 +1412,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             },
           ).then((value) async {
             // This code runs after the dialog is dismissed
-             _speak('', flutterTts!);
+            _speak('', flutterTts!);
             _stopSpeak(flutterTts);
             flutterTts = null; // Stop speaking when the dialog is closed
           });
