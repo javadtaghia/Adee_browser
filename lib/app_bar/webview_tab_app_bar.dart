@@ -204,7 +204,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                   textEditingValue.text); // Replace with
             },
             onSelected: (String selection) {
-              _searchController!.text = selection;
+               _searchController!.text = selection.replaceAll('"', '');
             },
             fieldViewBuilder: (BuildContext context,
                 TextEditingController? searchController,
@@ -295,7 +295,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer sk-test', // Replace with your actual API key
+      'Authorization': 'Bearer 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', // Replace with your actual API key
     };
 
     final data = {
@@ -307,8 +307,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               "User searches for $input; create a propser search suggestion provide only one suggestion"
         }
       ],
-      'max_tokens': 20,
-      'temperature': 0.3,
+      'max_tokens': 30,
+      'temperature': 0.5,
       // Include any other parameters as per the latest API documentation
     };
 
@@ -504,22 +504,22 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
                   var children = <Widget>[];
 
-                  if (Util.isIOS()) {
-                    children.add(
-                      SizedBox(
-                          width: 35.0,
-                          child: IconButton(
-                              padding: const EdgeInsets.all(0.0),
-                              icon: const Icon(
-                                Icons.arrow_back,
-                                color: Colors.black,
-                              ),
-                              onPressed: () {
-                                webViewController?.goBack();
-                                Navigator.pop(popupMenuContext);
-                              })),
-                    );
-                  }
+                  // if (Util.isIOS()) {
+                  //   children.add(
+                  //     SizedBox(
+                  //         width: 35.0,
+                  //         child: IconButton(
+                  //             padding: const EdgeInsets.all(0.0),
+                  //             icon: const Icon(
+                  //               Icons.arrow_back,
+                  //               color: Colors.black,
+                  //             ),
+                  //             onPressed: () {
+                  //               webViewController?.goBack();
+                  //               Navigator.pop(popupMenuContext);
+                  //             })),
+                  //   );
+                  // }
 
                   children.addAll([
                     SizedBox(
@@ -855,7 +855,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 );
               case PopupMenuActions.EXIT_APP:
                 return CustomPopupMenuItem<String>(
-                  enabled: true,
+                  enabled:  true ,
                   value: choice,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -954,7 +954,12 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         break;
       case PopupMenuActions.EXIT_APP:
         Future.delayed(const Duration(milliseconds: 300), () {
-          SystemNavigator.pop();
+           if (Util.isIOS()) {
+            exit(0);
+           } else {
+             SystemNavigator.pop();
+           }
+         
         });
         break;
       case PopupMenuActions.COPY_CURRENT_URL:
@@ -1366,6 +1371,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             },
           ).then((value) async {
             // This code runs after the dialog is dismissed
+             _speak('', flutterTts!);
             _stopSpeak(flutterTts);
             flutterTts = null; // Stop speaking when the dialog is closed
           });
