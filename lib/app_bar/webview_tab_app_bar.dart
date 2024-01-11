@@ -21,6 +21,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
@@ -295,7 +296,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer sk-api', // Replace with your actual API key
+      'Authorization': 'Bearer sk-d', // Replace with your actual API key
     };
 
     final data = {
@@ -868,6 +869,36 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       ]),
                 );
 
+              case PopupMenuActions.REVIEW:
+                return CustomPopupMenuItem<String>(
+                  enabled: true,
+                  value: choice,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(choice),
+                        const Icon(
+                          Icons.reviews,
+                          color: Colors.deepPurple,
+                        )
+                      ]),
+                );
+
+              case PopupMenuActions.DONATE:
+                return CustomPopupMenuItem<String>(
+                  enabled: true,
+                  value: choice,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(choice),
+                        const Icon(
+                          Icons.paypal_outlined,
+                          color: Colors.black,
+                        )
+                      ]),
+                );
+
               case PopupMenuActions.COPY_CURRENT_URL:
                 return CustomPopupMenuItem<String>(
                   enabled: browserModel.getCurrentTab() != null,
@@ -959,6 +990,21 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           } else {
             SystemNavigator.pop();
           }
+        });
+        break;
+      case PopupMenuActions.REVIEW:
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (Util.isIOS()) {
+            addNewTab(url: WebUri('https://adee.co/contact-us'));
+          } else {
+            addNewTab(url: WebUri('https://adee.co/contact-us'));
+          }
+        });
+        break;
+
+      case PopupMenuActions.DONATE:
+        Future.delayed(const Duration(milliseconds: 300), () {
+          addNewTab(url: WebUri('https://www.paypal.com/paypalme/adeeteam'));
         });
         break;
       case PopupMenuActions.COPY_CURRENT_URL:
