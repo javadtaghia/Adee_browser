@@ -28,6 +28,9 @@ class PopupMenuActions {
   // ignore: constant_identifier_names
   static const String TRIM_READER = "Reading mode";
 
+  static const String DONATE = "Support Adee";
+  static const String REVIEW = "Contact us";
+
   static const List<String> choices = <String>[
     NEW_TAB,
     NEW_INCOGNITO_TAB,
@@ -40,6 +43,8 @@ class PopupMenuActions {
     SETTINGS,
     // DESKTOP_MODE,
     COPY_CURRENT_URL,
+    DONATE,
+    REVIEW,
     EXIT_APP,
   ];
 }
