@@ -136,18 +136,16 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               builder: (context, isIncognitoMode, child) {
                 return leading != null
                     ? AppBar(
-                        backgroundColor: isIncognitoMode
-                            ? Colors.black87
-                            : Colors.deepPurple,
+                        backgroundColor:
+                            isIncognitoMode ? Colors.black87 : Colors.black87,
                         leading: _buildAppBarHomePageWidget(),
                         titleSpacing: 0.0,
                         title: _buildSearchTextField(),
                         actions: _buildActionsMenu(),
                       )
                     : AppBar(
-                        backgroundColor: isIncognitoMode
-                            ? Colors.black87
-                            : Colors.deepPurple,
+                        backgroundColor:
+                            isIncognitoMode ? Colors.black87 : Colors.black87,
                         titleSpacing: 10.0,
                         title: _buildSearchTextField(),
                         actions: _buildActionsMenu(),
@@ -296,7 +294,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer sk-d', // Replace with your actual API key
+      'Authorization': 'Bearer sk-', // Replace with your actual API key
     };
 
     final data = {
@@ -308,8 +306,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               " based on '$input' create a propser search suggestion to be asked from google; provide only one suggestion"
         }
       ],
-      'max_tokens': 30,
-      'temperature': 0.5,
+      'max_tokens': 20,
+      'temperature': 0.0,
       // Include any other parameters as per the latest API documentation
     };
 
