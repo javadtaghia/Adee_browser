@@ -46,3 +46,13 @@ To update pub
 ```bash
 flutter pub upgrade
 ```
+
+To upgrade flutter
+```bash
+flutter upgrade
+```
+
+To check packages 
+```bash
+flutter pub outdated
+```
