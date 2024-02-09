@@ -221,16 +221,25 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                   browserModel.showTab(browserModel.getCurrentTabIndex());
                 },
               ),
-              title:
-                  Text('Tabs [${browserModel.webViewTabs.length.toString()}]'),
+              title: Text('(${browserModel.webViewTabs.length.toString()})'),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
+                    var browserModel =
+                        Provider.of<BrowserModel>(context, listen: false);
+
+                    var settings = browserModel.getSettings();
+
+                    var url = settings.homePageEnabled &&
+                            settings.customUrlHomePage.isNotEmpty
+                        ? WebUri(settings.customUrlHomePage)
+                        : WebUri(settings.searchEngine.url);
+
                     browserModel.addTab(WebViewTab(
                       key: GlobalKey(),
                       webViewModel: WebViewModel(
-                          url: WebUri(''),
+                          url: url,
                           settings: browserModel.getDefaultTabSettings()),
                     ));
                   },
@@ -274,8 +283,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                                 "",
                         maxLines: 2,
                         style: TextStyle(
-                          color:
-                              isCurrentTab ? Colors.deepPurple : Colors.black,
+                          color: isCurrentTab ? Colors.black : Colors.black,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

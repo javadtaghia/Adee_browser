@@ -60,7 +60,7 @@ void showProgressNotification(String id, int progress) {
   );
 }
 
-void downloadCallback(String id, DownloadTaskStatus status, int progress) {
+void downloadCallback(String id, int status, int progress) {
   if (kDebugMode) {
     print(
         'Background Isolate Callback: task ($id) is in status ($status) and process ($progress)');
