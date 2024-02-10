@@ -346,10 +346,10 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
           //     currentWebViewModel.settings?.contentBlockers = contentBlockers;
           //   }
           //   try {
-          //     webViewController?.setSettings(
+          //     webViewController.setSettings(
           //         settings:
           //             currentWebViewModel.settings ?? InAppWebViewSettings());
-          //     var webSet = await webViewController?.getSettings();
+          //     var webSet = await webViewController.getSettings();
           //     currentWebViewModel.settings = webSet;
           //   } catch (e) {}
 

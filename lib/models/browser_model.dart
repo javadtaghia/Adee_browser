@@ -2,19 +2,14 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_inappwebview_platform_interface/src/in_app_webview/in_app_webview_settings.dart';
 import 'package:flutter_browser/models/web_archive_model.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:flutter_browser/models/favorite_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/webview_tab.dart';
-
 import 'search_engine_model.dart';
 import 'package:collection/collection.dart';
 
@@ -134,7 +129,7 @@ class BrowserModel extends ChangeNotifier {
 
   bool _showTabScroller = false;
 
-  setAdblocker() {
+  setAdblocker() async {
     final adUrlFilters = [
       ".*.cdn-test.mouseflow.com/.*",
       ".*.identify.hotjar.com/.*",
@@ -223,37 +218,180 @@ class BrowserModel extends ChangeNotifier {
       ".*.app.bugsnag.com/.*",
       ".*.browser.sentry-cdn.com/.*"
     ];
-    List<ContentBlocker>? contentBlockers = [];
-    for (final adUrlFilter in adUrlFilters) {
-      contentBlockers.add(ContentBlocker(
-          trigger: ContentBlockerTrigger(
-            urlFilter: adUrlFilter,
-          ),
-          action: ContentBlockerAction(
-            type: ContentBlockerActionType.BLOCK,
-          )));
+
+    // Initialize content blockers list with CSS display none for common ad-related CSS classes.
+    final List<ContentBlocker> contentBlockers =
+        adUrlFilters.map((adUrlFilter) {
+      return ContentBlocker(
+        trigger: ContentBlockerTrigger(urlFilter: adUrlFilter),
+        action: ContentBlockerAction(type: ContentBlockerActionType.BLOCK),
+      );
+    }).toList()
+          ..add(ContentBlocker(
+            trigger: ContentBlockerTrigger(urlFilter: ".*"),
+            action: ContentBlockerAction(
+                type: ContentBlockerActionType.CSS_DISPLAY_NONE,
+                selector: ".banner, .banners, .ads, .ad, .advert"),
+          ));
+
+    // Apply content blockers to all relevant web view settings.
+    applyContentBlockers(WebViewModel model) {
+      model.settings?.contentBlockers = contentBlockers;
+      try {
+        model.webViewController
+            ?.setSettings(settings: model.settings ?? InAppWebViewSettings());
+      } catch (e) {
+        if (kDebugMode) print("Error applying adblocker settings: $e");
+      }
     }
 
-    // Apply the "display: none" style to some HTML elements
-    contentBlockers.add(ContentBlocker(
-        trigger: ContentBlockerTrigger(
-          urlFilter: ".*",
-        ),
-        action: ContentBlockerAction(
-            type: ContentBlockerActionType.CSS_DISPLAY_NONE,
-            selector: ".banner, .banners, .ads, .ad, .advert")));
+    // Apply to current, default, and all web view tabs.
+    applyContentBlockers(_currentWebViewModel);
+    if (_defaultTabSettings != null) applyContentBlockers(_defaultTabSettings!);
+    for (var webViewTab in _webViewTabs) {
+      applyContentBlockers(webViewTab.webViewModel);
+    }
 
-    _currentWebViewModel.settings?.contentBlockers = contentBlockers;
     if (kDebugMode) {
-      print(
-          "@@@ I just did add the adblocks${_currentWebViewModel.settings!.contentBlockers}");
+      print("Adblocker settings applied.");
     }
-
-    try {
-      _currentWebViewModel.webViewController?.setSettings(
-          settings: _currentWebViewModel.settings ?? InAppWebViewSettings());
-    } catch (e) {}
   }
+
+  // setAdblocker() async {
+  //   final adUrlFilters = [
+  //     ".*.cdn-test.mouseflow.com/.*",
+  //     ".*.identify.hotjar.com/.*",
+  //     ".*.static.media media.net/.*",
+  //     ".*.claritybt.freshmarketer.com/.*",
+  //     ".*.mediavisor.doubleclick.net/.*",
+  //     ".*.events3alt.adcolony.com/.*",
+  //     ".*.analytics.google.com/.*",
+  //     ".*.stats.g.doubleclick.net/.*",
+  //     ".*.adtago.s3.amazonaws.com/.*",
+  //     ".*.w1.luckyorange.com/.*",
+  //     ".*.careers.hotjar.com/.*",
+  //     ".*.adbrite.com/.*",
+  //     ".*.m.doubleclick.net/.*",
+  //     ".*.analytics.pointdrive.linkedin.com/.*",
+  //     ".*.googlesyndication.com/.*",
+  //     ".*.exponential.com/.*",
+  //     ".*.log.pinterest.com/.*",
+  //     ".*.o2.mouseflow.com/.*",
+  //     ".*.adc3-launch.adcolony.com/.*",
+  //     ".*.gtm.mouseflow.com/.*",
+  //     ".*.analytics.s3.amazonaws.com/.*",
+  //     ".*.mouseflow.com/.*",
+  //     ".*.insights.hotjar.com/.*",
+  //     ".*.zedo.com/.*",
+  //     ".*.static.doubleclick.net/.*",
+  //     ".*.adm.hotjar.com/.*",
+  //     ".*.events.hotjar.io/.*",
+  //     ".*.events.reddit.com/.*",
+  //     ".*.adservetx.media.net/.*",
+  //     ".*.widgets.pinterest.com/.*",
+  //     ".*.scorecardresearch.com/.*",
+  //     ".*.cdn.mouseflow.com/.*",
+  //     ".*.cdn.luckyorange.com/.*",
+  //     ".*.click.googleanalytics.com/.*",
+  //     ".*.settings.luckyorange.net/.*",
+  //     ".*.realtime.luckyorange.com/.*",
+  //     ".*.doubleclick.net/.*",
+  //     ".*.api.mouseflow.com/.*",
+  //     ".*.tools.mouseflow.com/.*",
+  //     ".*.ssl.google-analytics.com/.*",
+  //     ".*.api.luckyorange.com/.*",
+  //     ".*.analyticsengine.s3.amazonaws.com/.*",
+  //     ".*.adsymptotic.com/.*",
+  //     ".*.adservice.google.com/.*",
+  //     ".*.ads.pubmatic.com/.*",
+  //     ".*.afs.googlesyndication.com/.*",
+  //     ".*.pagead2.googleadservices.com/.*",
+  //     ".*.ads.linkedin.com/.*",
+  //     ".*.analytics.pinterest.com/.*",
+  //     ".*.events.redditmedia.com/.*",
+  //     ".*.script.hotjar.com/.*",
+  //     ".*.cs.luckyorange.net/.*",
+  //     ".*.fwtracks.freshmarketer.com/.*",
+  //     ".*.ads.pinterest.com/.*",
+  //     ".*.quantserve.com/.*",
+  //     ".*.google-analytics.com/.*",
+  //     ".*.advertising-api-eu.amazon.com/.*",
+  //     ".*.surveys.hotjar.com/.*",
+  //     ".*.advice-ads.s3.amazonaws.com/.*",
+  //     ".*.ad.doubleclick.net/.*",
+  //     ".*.stats.wp.com/.*",
+  //     ".*.trk.pinterest.com/.*",
+  //     ".*.freshmarketer.com/.*",
+  //     ".*.upload.luckyorange.net/.*",
+  //     ".*.adservice.google.*/.*",
+  //     ".*.app-measurement.com/.*",
+  //     ".*.pagead2.googlesyndication.com/.*",
+  //     ".*.ads30.adcolony.com/.*",
+  //     ".*.wd.adcolony.com/.*",
+  //     ".*.events.reddit.com/.*",
+  //     ".*.static.ads-twitter.com/.*",
+  //     ".*.ads-api.twitter.com/.*",
+  //     ".*.ads.pinterest.com/.*",
+  //     ".*.log.pinterest.com/.*",
+  //     ".*.analytics.pinterest.com/.*",
+  //     ".*.widgets.pinterest.com/.*",
+  //     ".*.media.net/.*",
+  //     ".*static.media.net/.*",
+  //     ".*.luckyorange.com/.*",
+  //     ".*.pixel.facebook.com/.*",
+  //     ".*.an.facebook.com/.*",
+  //     ".*.notify.bugsnag.com/.*",
+  //     ".*.sessions.bugsnag.com/.*",
+  //     ".*.api.bugsnag.com/.*",
+  //     ".*.app.bugsnag.com/.*",
+  //     ".*.browser.sentry-cdn.com/.*"
+  //   ];
+  //   List<ContentBlocker>? contentBlockers = [];
+  //   for (final adUrlFilter in adUrlFilters) {
+  //     contentBlockers.add(ContentBlocker(
+  //         trigger: ContentBlockerTrigger(
+  //           urlFilter: adUrlFilter,
+  //         ),
+  //         action: ContentBlockerAction(
+  //           type: ContentBlockerActionType.BLOCK,
+  //         )));
+  //   }
+
+  //   // Apply the "display: none" style to some HTML elements
+  //   contentBlockers.add(ContentBlocker(
+  //       trigger: ContentBlockerTrigger(
+  //         urlFilter: ".*",
+  //       ),
+  //       action: ContentBlockerAction(
+  //           type: ContentBlockerActionType.CSS_DISPLAY_NONE,
+  //           selector: ".banner, .banners, .ads, .ad, .advert")));
+
+  //   _currentWebViewModel.settings?.contentBlockers = contentBlockers;
+  //   _defaultTabSettings?.settings?.contentBlockers = contentBlockers;
+  //   for (var webViewTab in _webViewTabs) {
+  //     webViewTab.webViewModel.settings?.contentBlockers = contentBlockers;
+  //   }
+  //   if (kDebugMode) {
+  //     print(
+  //         "@@@ I just did add the adblocks${_currentWebViewModel.settings!.contentBlockers}");
+  //   }
+
+  //   try {
+  //     _currentWebViewModel.webViewController?.setSettings(
+  //         settings: _currentWebViewModel.settings ?? InAppWebViewSettings());
+  //   } catch (e) {}
+
+  //   var webViewController = _currentWebViewModel.webViewController;
+
+  //   webViewController?.setSettings(
+  //       settings: _currentWebViewModel.settings ?? InAppWebViewSettings());
+  //   var webSet = await webViewController?.getSettings();
+  //   _currentWebViewModel.settings = webSet;
+  //   if (kDebugMode) {
+  //     print(
+  //         "### ADBLOCKER SETTINGS: ${_currentWebViewModel.settings?.contentBlockers}");
+  //   }
+  // }
 
   getDefaultTabSettings() {
     // _currentWebViewModel.settings?.minimumFontSize = 64; // javad
@@ -420,6 +558,7 @@ class BrowserModel extends ChangeNotifier {
 
   void addFavorites(List<FavoriteModel> favorites) {
     _favorites.addAll(favorites);
+
     if (kDebugMode) {
       print("fav add all${_favorites.length}");
     }

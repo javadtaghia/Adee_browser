@@ -712,7 +712,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         Text(choice),
                         const Icon(
                           Icons.book_online_rounded,
-                          color: Colors.deepPurpleAccent,
+                          color: Colors.black,
                         )
                       ]),
                 );
@@ -726,7 +726,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         Text(choice),
                         const Icon(
                           Icons.star,
-                          color: Colors.yellow,
+                          color: Colors.black,
                         )
                       ]),
                 );
@@ -740,7 +740,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         Text(choice),
                         const Icon(
                           Icons.offline_pin,
-                          color: Colors.deepPurple,
+                          color: Colors.black,
                         )
                       ]),
                 );
@@ -790,7 +790,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         Text(choice),
                         const Icon(
                           Ionicons.share,
-                          color: Colors.green,
+                          color: Colors.black,
                         )
                       ]),
                 );
@@ -804,7 +804,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         Text(choice),
                         const Icon(
                           Icons.settings,
-                          color: Colors.grey,
+                          color: Colors.black,
                         )
                       ]),
                 );
@@ -877,7 +877,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         Text(choice),
                         const Icon(
                           Icons.reviews,
-                          color: Colors.deepPurple,
+                          color: Colors.black,
                         )
                       ]),
                 );
