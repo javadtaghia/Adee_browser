@@ -16,8 +16,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix. 11/01/2024
-version: 2.0.0+43
+# of the product and file versions while build-number is used as the build suffix. 13/02/2024
+version: 2.0.0+45
 
 environment:
   sdk: ">=3.2.0"
